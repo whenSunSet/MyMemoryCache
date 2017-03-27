@@ -31,7 +31,7 @@ import javax.annotation.concurrent.ThreadSafe;
  * 3.CountingMemoryCache中使用了两个包装了LinkedHashMap的CountingLruMap，一个mCachedEntries用来储存所有的Entry，一个mExclusiveEntries
  * 用来储存所有clientCount为0的Entry，因为Entry只有在cache()中会被调用，而cache()会返回一个CloseableReference，所以该Entry在创建的时候
  * clientCount为1。
- * 4.由于mExclusiveEntries是一个LinkedHashMap，所以在清楚缓存的时候，我们只要按照顺序清除就已经实现了LRU算法了。而在一般情况下
+ * 4.由于mExclusiveEntries是一个LinkedHashMap，所以在清除缓存的时候，我们只要按照顺序清除就已经实现了LRU算法了。而在一般情况下
  * clientCount为0的Entry比不为0的Entry多许多，所以基本不需要担心内存清理问题。
  * 5.我们在2中说了clientCount就代表着该资源所有的引用数，在newClientReference()中使用CloseableReference#of()创建CloseableReference的时候
  * 传入了一个ResourceReleaser的实现，这个实现调用了releaseClientReference()，这里的实现和CloseableReference中的实现是不同的
@@ -289,7 +289,6 @@ public class CountingMemoryCache<K, V> implements MemoryCache<K, V>, MemoryTrimm
             decreaseClientCount(entry);
             //判断是否需要添加到 待销毁条目Map 中
             isExclusiveAdded = maybeAddToExclusives(entry);
-
             oldRefToClose = referenceToClose(entry);
         }
         //关闭这个客户端引用
